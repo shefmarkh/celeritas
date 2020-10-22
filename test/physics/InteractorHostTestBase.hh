@@ -47,9 +47,9 @@ class InteractorHostTestBase : public celeritas::Test
     //! Type aliases
     using RandomEngine = std::mt19937;
 
-    using real_type              = celeritas::real_type;
-    using PDGNumber              = celeritas::PDGNumber;
-    using MevEnergy              = celeritas::units::MevEnergy;
+    using real_type = celeritas::real_type;
+    using PDGNumber = celeritas::PDGNumber;
+    using MevEnergy = celeritas::units::MevEnergy;
 
     using Interaction            = celeritas::Interaction;
     using ParticleParams         = celeritas::ParticleParams;
@@ -89,9 +89,9 @@ class InteractorHostTestBase : public celeritas::Test
 
     //@{
     //! Secondary stack storage and access
-    void                             resize_secondaries(int count);
+    void                      resize_secondaries(int count);
     const HostSecondaryStore& secondaries() const { return secondaries_; }
-    SecondaryAllocatorView& secondary_allocator()
+    SecondaryAllocatorView&   secondary_allocator()
     {
         REQUIRE(sa_view_);
         return *sa_view_;
@@ -113,7 +113,7 @@ class InteractorHostTestBase : public celeritas::Test
     celeritas::ParticleTrackState     particle_state_;
     celeritas::ParticleParamsPointers pp_pointers_;
     celeritas::ParticleStatePointers  ps_pointers_;
-    Real3                     inc_direction_ = {0, 0, 1};
+    Real3                             inc_direction_ = {0, 0, 1};
     HostSecondaryStore                secondaries_;
 
     // Views

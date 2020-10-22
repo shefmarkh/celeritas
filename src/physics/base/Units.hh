@@ -58,5 +58,5 @@ using LightSpeed       = Quantity<CLight>;
 //@}
 
 //---------------------------------------------------------------------------//
-} // namespace celeritas
+} // namespace units
 } // namespace celeritas
