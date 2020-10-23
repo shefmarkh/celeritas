@@ -22,6 +22,7 @@ pipeline {
                         dir('build') {
                             sh '''
 . /etc/profile.d/celeritas_spack_env.sh
+git lfs pull
 cmake -G Ninja \
   -DCELERITAS_BUILD_DEMOS:BOOL=ON \
   -DCELERITAS_BUILD_TESTS:BOOL=ON \
