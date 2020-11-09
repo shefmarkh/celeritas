@@ -43,9 +43,9 @@ class GeoTrackView
 
     // Initialize the state
     inline CELER_FUNCTION GeoTrackView& operator=(const Initializer_t& init);
-    // Initialize the state from a secondary and its parent state
+    // Initialize the state from a parent state and new direction
     inline CELER_FUNCTION void
-    copy_state(const GeoTrackView& parent, const Secondary& secondary);
+    copy_state(const GeoTrackView& parent, Real3 direction);
     // Find the distance to the next boundary
     inline CELER_FUNCTION void find_next_step();
     // Move to the next boundary

@@ -35,7 +35,7 @@ class TrackInitializerStore
     void initialize_tracks(StatePointers states, ParamPointers params);
 
     // Find vacant slots and count surviving secondaries per track
-    void find_vacancies(StatePointers states);
+    void find_vacancies(StatePointers states, ParamPointers params);
 
     // Create track initializers on device from primary particles
     void create_from_primaries(span<const Primary> primaries);
@@ -44,10 +44,16 @@ class TrackInitializerStore
     void create_from_secondaries(StatePointers states, ParamPointers params);
 
   private:
+    // Track initializers created from primaries or secondaries
     DeviceVector<TrackInitializer> initializers_;
-    DeviceVector<size_type>        vacancies_;
-    DeviceVector<size_type>        secondary_counts_;
-    size_type                      track_count_;
+    // Thread ID of the secondary's parent
+    DeviceVector<size_type> parent_;
+    // Index of empty slots in track vector
+    DeviceVector<size_type> vacancies_;
+    // Numbe of surviving secondaries produced in each interaction
+    DeviceVector<size_type> secondary_counts_;
+    // Total number of tracks initialized in the simulation
+    size_type track_count_;
 };
 
 //---------------------------------------------------------------------------//

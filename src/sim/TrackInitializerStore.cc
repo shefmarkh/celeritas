@@ -19,6 +19,7 @@ namespace celeritas
 TrackInitializerStore::TrackInitializerStore(
     ParticleStateStore& particles, SecondaryAllocatorStore& secondaries)
     : initializers_(secondaries.capacity())
+    , parent_(secondaries.capacity())
     , vacancies_(particles.size())
     , secondary_counts_(particles.size())
     , track_count_(0)
@@ -40,6 +41,7 @@ TrackInitializerPointers TrackInitializerStore::device_pointers()
 {
     TrackInitializerPointers result;
     result.initializers     = initializers_.device_pointers();
+    result.parent           = parent_.device_pointers();
     result.vacancies        = vacancies_.device_pointers();
     result.secondary_counts = secondary_counts_.device_pointers();
     result.track_count      = track_count_;
@@ -75,14 +77,15 @@ void TrackInitializerStore::initialize_tracks(StatePointers states,
  * Find empty slots in the vector of track states and count the number of
  * secondaries that survived cutoffs for each interaction.
  */
-void TrackInitializerStore::find_vacancies(StatePointers states)
+void TrackInitializerStore::find_vacancies(StatePointers states,
+                                           ParamPointers params)
 {
     // Resize the vector of vacancies to be equal to the number of tracks
     vacancies_.resize(states.size());
 
     // Launch a kernel to find the indices of the empty track slots and the
     // number of surviving secondaries per track
-    process_post_interaction(states, this->device_pointers());
+    process_post_interaction(states, params, this->device_pointers());
 
     // Remove all elements in the vacancy vector that were flagged as active
     // tracks, leaving the (sorted) indices of the empty slots
@@ -133,6 +136,7 @@ void TrackInitializerStore::create_from_secondaries(StatePointers states,
 
     // Resize the vector of track initializers
     initializers_.resize(initializers_.size() + num_sec);
+    parent_.resize(num_sec);
 }
 
 //---------------------------------------------------------------------------//
