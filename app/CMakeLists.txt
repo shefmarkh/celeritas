@@ -90,6 +90,23 @@ if(CELERITAS_BUILD_DEMOS AND CELERITAS_USE_CUDA)
     set_tests_properties("app/demo-interactor" PROPERTIES
       ENVIRONMENT "CELERITAS_DEMO_EXE=$<TARGET_FILE:demo-interactor>"
     )
+
+    #Now build Alpaka version
+    find_package(alpaka QUIET)
+
+    if(NOT alpaka_FOUND)
+      message(STATUS "No alpaka install found, disabling build of FisherPrice_Alpaka")
+    else()
+      alpaka_add_executable(demo-interactor-alpaka demo-interactor-alpaka/demo-interactor-alpaka.cc
+      )
+
+      target_link_libraries(demo-interactor-alpaka PRIVATE celeritas
+        CUDA::cudart
+        nlohmann_json::nlohmann_json
+        alpaka::alpaka
+      )
+    endif()
+
   endif()
 
   # Build CPU version
