@@ -7,6 +7,8 @@
 //---------------------------------------------------------------------------//
 #include "KNDemoKernel.hh"
 
+#include <alpaka/alpaka.hpp>
+
 #include <thrust/device_ptr.h>
 #include <thrust/reduce.h>
 #include "base/ArrayUtils.hh"
@@ -53,6 +55,25 @@ __global__ void initialize_kn(ParamPointers const   params,
         states.alive[tid]     = true;
     }
 }
+
+using namespace alpaka;
+
+struct initialize_alpaka{
+  template <typename Acc>
+  ALPAKA_FN_ACC void operator()(Acc const &acc,ParamPointers const params,StatePointers const states,InitialPointers const init){
+    for(int tid = idx::getIdx<Grid, Threads>(acc)[0];tid < static_cast<int>(states.size());tid += blockDim.x * gridDim.x){
+      ParticleTrackView particle(params.particle, states.particle, ThreadId(tid));
+      particle = init.particle;
+
+      // Particles begin alive and in the +z direction
+      states.direction[tid] = {0, 0, 1};
+      states.position[tid]  = {0, 0, 0};
+      states.time[tid]      = 0;
+      states.alive[tid]     = true;
+    }
+
+  }
+};
 
 //---------------------------------------------------------------------------//
 /*!

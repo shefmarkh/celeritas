@@ -91,30 +91,6 @@ if(CELERITAS_BUILD_DEMOS AND CELERITAS_USE_CUDA)
       ENVIRONMENT "CELERITAS_DEMO_EXE=$<TARGET_FILE:demo-interactor>"
     )
 
-    #Now build Alpaka version
-    find_package(alpaka QUIET)
-
-    if(NOT alpaka_FOUND)
-      message(STATUS "No alpaka install found, disabling build of FisherPrice_Alpaka")
-    else()
-      alpaka_add_executable(demo-interactor-alpaka demo-interactor-alpaka/demo-interactor-alpaka.cc
-        demo-interactor-alpaka/KNDemoKernel.cu
-        demo-interactor-alpaka/KNDemoIO.cc
-        demo-interactor-alpaka/KNDemoRunner.cc
-        demo-interactor-alpaka/PhysicsArrayParams.cc
-        demo-interactor-alpaka/LoadXs.cc
-        demo-interactor-alpaka/DetectorStore.cc
-        demo-interactor-alpaka/detail/DetectorUtils.cu
-        demo-interactor-alpaka/HitAllocatorStore.cc
-      )
-
-      target_link_libraries(demo-interactor-alpaka PRIVATE celeritas
-        CUDA::cudart
-        nlohmann_json::nlohmann_json
-        alpaka::alpaka
-      )
-    endif()
-
   endif()
 
   # Build CPU version
@@ -180,5 +156,31 @@ if(CELERITAS_BUILD_DEMOS AND CELERITAS_USE_CUDA AND CELERITAS_USE_VecGeom)
     )
   endif()
 endif()
+
+#Now build Alpaka version
+find_package(alpaka QUIET)
+find_package(nlohmann_json)
+
+if(NOT alpaka_FOUND)
+  message(STATUS "No alpaka install found, disabling build of FisherPrice_Alpaka")
+else()
+  alpaka_add_executable(demo-interactor-alpaka demo-interactor-alpaka/demo-interactor-alpaka.cc
+    demo-interactor-alpaka/KNDemoKernel.cu
+    demo-interactor-alpaka/KNDemoIO.cc
+    demo-interactor-alpaka/KNDemoRunner.cc
+    demo-interactor-alpaka/PhysicsArrayParams.cc
+    demo-interactor-alpaka/LoadXs.cc
+    demo-interactor-alpaka/DetectorStore.cc
+    demo-interactor-alpaka/detail/DetectorUtils.cu
+    demo-interactor-alpaka/HitAllocatorStore.cc
+  )
+
+  target_link_libraries(demo-interactor-alpaka PRIVATE celeritas
+    CUDA::cudart
+    nlohmann_json::nlohmann_json
+    alpaka::alpaka
+  )
+ endif()
+
 
 #-----------------------------------------------------------------------------#
