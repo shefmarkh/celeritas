@@ -98,6 +98,14 @@ if(CELERITAS_BUILD_DEMOS AND CELERITAS_USE_CUDA)
       message(STATUS "No alpaka install found, disabling build of FisherPrice_Alpaka")
     else()
       alpaka_add_executable(demo-interactor-alpaka demo-interactor-alpaka/demo-interactor-alpaka.cc
+        demo-interactor-alpaka/KNDemoKernel.cu
+        demo-interactor-alpaka/KNDemoIO.cc
+        demo-interactor-alpaka/KNDemoRunner.cc
+        demo-interactor-alpaka/PhysicsArrayParams.cc
+        demo-interactor-alpaka/LoadXs.cc
+        demo-interactor-alpaka/DetectorStore.cc
+        demo-interactor-alpaka/detail/DetectorUtils.cu
+        demo-interactor-alpaka/HitAllocatorStore.cc
       )
 
       target_link_libraries(demo-interactor-alpaka PRIVATE celeritas

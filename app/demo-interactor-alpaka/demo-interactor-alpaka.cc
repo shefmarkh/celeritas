@@ -17,9 +17,10 @@
 #include "comm/ScopedMpiInit.hh"
 #include "comm/Utils.hh"
 #include "physics/base/ParticleParams.hh"
-//#include "KNDemoIO.hh"
-//#include "KNDemoRunner.hh"
-//#include "LoadXs.hh"
+#include "KNDemoKernel.hh"
+#include "KNDemoIO.hh"
+#include "KNDemoRunner.hh"
+#include "LoadXs.hh"
 
 using namespace celeritas;
 //using namespace demo_interactor;
@@ -33,7 +34,7 @@ namespace demo_interactor
 /*!
  * Construct particle parameters and send to GPU.
  */
-/*
+
 std::shared_ptr<ParticleParams> load_params()
 {
     using namespace celeritas::units;
@@ -46,7 +47,7 @@ std::shared_ptr<ParticleParams> load_params()
            {{"gamma", pdg::gamma()}, {zero, zero, stable}}};
     return std::make_shared<ParticleParams>(std::move(defs));
 }
-*/
+
 //---------------------------------------------------------------------------//
 /*!
  * Run, launch, and output.
@@ -60,10 +61,11 @@ void run(std::istream& is)
     celeritas::initialize_device(Communicator::comm_world());
 
     // Construct runner
-    /*
+    
     auto         grid_params = inp.at("grid_params").get<CudaGridParams>();
+    
     KNDemoRunner run(load_params(), load_xs(), grid_params);
-
+    /*
     // For now, only do a single run
     auto run_args = inp.at("run").get<KNDemoRunArgs>();
     REQUIRE(run_args.energy > 0);
