@@ -65,7 +65,7 @@ void run(std::istream& is)
     auto         grid_params = inp.at("grid_params").get<CudaGridParams>();
     
     KNDemoRunner run(load_params(), load_xs(), grid_params);
-    /*
+    
     // For now, only do a single run
     auto run_args = inp.at("run").get<KNDemoRunArgs>();
     REQUIRE(run_args.energy > 0);
@@ -79,7 +79,7 @@ void run(std::istream& is)
         {"result", result},
     };
     cout << outp.dump() << endl;
-    */
+    
 }
 } // namespace demo_interactor
 

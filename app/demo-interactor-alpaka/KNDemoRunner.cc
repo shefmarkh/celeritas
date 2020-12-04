@@ -92,6 +92,7 @@ auto KNDemoRunner::operator()(KNDemoRunArgs args) -> result_type
 
     // Initialize particle states
     initialize(launch_params_, params, state, initial);
+    /*
     result.alive.push_back(args.num_tracks);
 
     size_type remaining_steps = args.max_steps;
@@ -130,7 +131,7 @@ auto KNDemoRunner::operator()(KNDemoRunArgs args) -> result_type
 
     // Store total time
     result.total_time = total_time();
-
+    */
     return result;
 }
 
