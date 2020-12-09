@@ -171,14 +171,16 @@ else()
     demo-interactor-alpaka/PhysicsArrayParams.cc
     demo-interactor-alpaka/LoadXs.cc
     demo-interactor-alpaka/DetectorStore.cc
-    demo-interactor-alpaka/detail/DetectorUtils.cu
+    demo-interactor/detail/DetectorUtils.cu
     demo-interactor-alpaka/HitAllocatorStore.cc
+    demo-interactor-alpaka/DeviceAllocationAlpaka.cu    
   )
 
   target_link_libraries(demo-interactor-alpaka PRIVATE celeritas
     CUDA::cudart
     nlohmann_json::nlohmann_json
     alpaka::alpaka
+    #VecGeom::vecgeomcuda
   )
  endif()
 
