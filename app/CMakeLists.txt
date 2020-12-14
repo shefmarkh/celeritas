@@ -176,7 +176,7 @@ else()
     ../../src/physics/base/ParticleParams.cc
     ../../src/comm/Communicator.nompi.cc
     ../../src/comm/ScopedMpiInit.nompi.cc
-    ../../src/comm/Utils.cc
+    ../src/comm/Utils.cu
     ../../src/base/Assert.cc
     ../../src/base/ColorUtils.cc
     ../src/base/DeviceAllocationAlpaka.cu
