@@ -86,4 +86,4 @@ inline void swap(DeviceVector<T>&, DeviceVector<T>&) noexcept;
 //---------------------------------------------------------------------------//
 } // namespace celeritas
 
-#include "DeviceVector.i.hh"
+#include "DeviceVector.cu"

@@ -7,8 +7,8 @@
 //---------------------------------------------------------------------------//
 #pragma once
 
-#include "base/StackAllocatorPointers.hh"
-#include "base/UniformGrid.hh"
+#include "../../src/base/StackAllocatorPointers.hh"
+#include "../../src/base/UniformGrid.hh"
 #include "physics/base/Units.hh"
 
 namespace celeritas

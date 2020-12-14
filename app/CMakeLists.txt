@@ -164,23 +164,44 @@ find_package(nlohmann_json)
 if(NOT alpaka_FOUND)
   message(STATUS "No alpaka install found, disabling build of FisherPrice_Alpaka")
 else()
-  alpaka_add_executable(demo-interactor-alpaka demo-interactor-alpaka/demo-interactor-alpaka.cc
+  alpaka_add_executable(demo-interactor-alpaka demo-interactor-alpaka/demo-interactor-alpaka.cc    
     demo-interactor-alpaka/KNDemoKernel.cu
     demo-interactor-alpaka/KNDemoIO.cc
     demo-interactor-alpaka/KNDemoRunner.cc
     demo-interactor-alpaka/PhysicsArrayParams.cc
     demo-interactor-alpaka/LoadXs.cc
     demo-interactor-alpaka/DetectorStore.cc
-    demo-interactor/detail/DetectorUtils.cu
+    demo-interactor-alpaka/detail/DetectorUtils.cu
     demo-interactor-alpaka/HitAllocatorStore.cc
-    demo-interactor-alpaka/DeviceAllocationAlpaka.cu    
+    ../../src/physics/base/ParticleParams.cc
+    ../../src/comm/Communicator.nompi.cc
+    ../../src/comm/ScopedMpiInit.nompi.cc
+    ../../src/comm/Utils.cc
+    ../../src/base/Assert.cc
+    ../../src/base/ColorUtils.cc
+    ../../src/base/DeviceAllocation.cuda.cc
+    ../../src/base/KernelParamCalculator.cuda.cc
+    ../src/base/Memory.cu
   )
 
-  target_link_libraries(demo-interactor-alpaka PRIVATE celeritas
+  set(_CONFIG_NAME "celeritas_config.h")
+    configure_file("${_CONFIG_NAME}.in" "${_CONFIG_NAME}" @ONLY)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_CONFIG_NAME}"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+  )
+
+  target_include_directories(demo-interactor-alpaka
+  PUBLIC    
+    "${CMAKE_CURRENT_BINARY_DIR}"
+    ../src/
+  )
+
+
+  target_link_libraries(demo-interactor-alpaka PRIVATE 
     CUDA::cudart
     nlohmann_json::nlohmann_json
     alpaka::alpaka
-    #VecGeom::vecgeomcuda
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
  endif()
 

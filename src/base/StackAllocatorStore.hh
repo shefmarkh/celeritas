@@ -7,7 +7,7 @@
 //---------------------------------------------------------------------------//
 #pragma once
 
-#include "DeviceVector.hh"
+#include "base/DeviceVector.hh"
 #include "StackAllocatorPointers.hh"
 #include "Types.hh"
 

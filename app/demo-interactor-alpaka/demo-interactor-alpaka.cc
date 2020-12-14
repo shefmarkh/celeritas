@@ -3,7 +3,7 @@
 // See the top-level COPYRIGHT file for details.
 // SPDX-License-Identifier: (Apache-2.0 OR MIT)
 //---------------------------------------------------------------------------//
-//! \file demo-interactor.cc
+//! \file demo-interactor-alpaka.cc
 //---------------------------------------------------------------------------//
 
 #include <cstddef>

@@ -9,11 +9,12 @@
 
 #include "base/Range.hh"
 #include "base/Stopwatch.hh"
-#include "random/cuda/RngStateStore.hh"
-#include "physics/base/ParticleStateStore.hh"
-#include "physics/base/SecondaryAllocatorStore.hh"
-#include "physics/base/Units.hh"
+//#include "random/cuda/RngStateStore.hh"
+//#include "physics/base/ParticleStateStore.hh"
+//#include "physics/base/SecondaryAllocatorStore.hh"
+//#include "physics/base/Units.hh"
 #include "DetectorStore.hh"
+#include "base/DeviceVector.hh"
 
 using namespace celeritas;
 
@@ -63,35 +64,35 @@ auto KNDemoRunner::operator()(KNDemoRunArgs args) -> result_type
     Stopwatch total_time;
 
     // Allocate device data
-    SecondaryAllocatorStore secondaries(args.num_tracks);
-    ParticleStateStore      track_states(args.num_tracks);
-    RngStateStore           rng_states(args.num_tracks, args.seed);
-    DeviceVector<Real3>     position(args.num_tracks);
-    DeviceVector<Real3>     direction(args.num_tracks);
-    DeviceVector<double>    time(args.num_tracks);
-    DeviceVector<bool>      alive(args.num_tracks);
-    DetectorStore           detector(args.num_tracks, args.tally_grid);
+    //SecondaryAllocatorStore secondaries(args.num_tracks);
+    //ParticleStateStore      track_states(args.num_tracks);
+    //RngStateStore           rng_states(args.num_tracks, args.seed);
+    //DeviceVector<Real3>     position(args.num_tracks);
+    //DeviceVector<Real3>     direction(args.num_tracks);
+    //DeviceVector<double>    time(args.num_tracks);
+    //DeviceVector<bool>      alive(args.num_tracks);
+    //DetectorStore           detector(args.num_tracks, args.tally_grid);
 
     // Construct pointers to device data
-    ParamPointers params;
-    params.particle      = pparams_->device_pointers();
-    params.xs            = xsparams_->device_pointers();
-    params.kn_interactor = kn_pointers_;
+    //ParamPointers params;
+    //params.particle      = pparams_->device_pointers();
+    //params.xs            = xsparams_->device_pointers();
+    //params.kn_interactor = kn_pointers_;
 
-    InitialPointers initial;
-    initial.particle = ParticleTrackState{kn_pointers_.gamma_id,
-                                          units::MevEnergy{args.energy}};
+    //InitialPointers initial;
+    //initial.particle = ParticleTrackState{kn_pointers_.gamma_id,
+    //                                      units::MevEnergy{args.energy}};
 
-    StatePointers state;
-    state.particle  = track_states.device_pointers();
-    state.rng       = rng_states.device_pointers();
-    state.position  = position.device_pointers();
-    state.direction = direction.device_pointers();
-    state.time      = time.device_pointers();
-    state.alive     = alive.device_pointers();
+    //StatePointers state;
+    //state.particle  = track_states.device_pointers();
+    //state.rng       = rng_states.device_pointers();
+    //state.position  = position.device_pointers();
+    //state.direction = direction.device_pointers();
+    //state.time      = time.device_pointers();
+    //state.alive     = alive.device_pointers();
 
     // Initialize particle states
-    initialize(launch_params_, params, state, initial);
+    //initialize(launch_params_, params, state, initial);
     /*
     result.alive.push_back(args.num_tracks);
 

@@ -40,6 +40,7 @@ if(CELERITAS_USE_CUDA)
   list(APPEND SOURCES
     #base/DeviceAllocationAlpaka.cu
     #base/DeviceAllocation.cuda.cc
+    #base/DeviceVector.cu
     base/KernelParamCalculator.cuda.cc
     base/Memory.cu
     random/cuda/RngStateInit.cu

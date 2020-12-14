@@ -88,4 +88,6 @@ class ParticleParams
 //---------------------------------------------------------------------------//
 } // namespace celeritas
 
+
+
 #include "ParticleParams.i.hh"
