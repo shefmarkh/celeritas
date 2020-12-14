@@ -10,6 +10,8 @@
 #include <cuda_runtime_api.h>
 #include "base/Assert.hh"
 
+#include <alpaka/alpaka.hpp>
+
 namespace celeritas
 {
 //---------------------------------------------------------------------------//

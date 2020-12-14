@@ -179,7 +179,7 @@ else()
     ../../src/comm/Utils.cc
     ../../src/base/Assert.cc
     ../../src/base/ColorUtils.cc
-    ../../src/base/DeviceAllocation.cuda.cc
+    ../src/base/DeviceAllocationAlpaka.cu
     ../../src/base/KernelParamCalculator.cuda.cc
     ../src/base/Memory.cu
   )
