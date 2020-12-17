@@ -15,6 +15,7 @@
 //#include "physics/base/Units.hh"
 #include "DetectorStore.hh"
 #include "base/DeviceVector.hh"
+#include "base/DeviceVectorAlpaka.hh"
 
 using namespace celeritas;
 

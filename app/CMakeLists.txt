@@ -181,7 +181,8 @@ else()
     ../../src/base/ColorUtils.cc
     ../src/base/DeviceAllocationAlpaka.cu
     ../../src/base/KernelParamCalculator.cuda.cc
-    ../src/base/Memory.cu
+    ../src/base/Memory.cu    
+    ../src/base/DeviceVectorAlpaka.cu
   )
 
   set(_CONFIG_NAME "celeritas_config.h")
