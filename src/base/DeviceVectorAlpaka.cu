@@ -80,6 +80,7 @@ auto DeviceVectorAlpaka<T>::device_pointers() -> Span_t
 {
     //return {reinterpret_cast<T*>(allocation_.device_pointers().data()),
     //        this->size()};
+    //Create a span_t from Alpaka
     return nullptr;
 }
 
@@ -92,6 +93,7 @@ auto DeviceVectorAlpaka<T>::device_pointers() const -> constSpan_t
 {
     //return {reinterpret_cast<const T*>(allocation_.device_pointers().data()),
     //        this->size()};
+    //Create a constSpan_t from Alpaka
     return nullptr;
 }
 

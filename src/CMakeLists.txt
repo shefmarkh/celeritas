@@ -92,24 +92,24 @@ if(CELERITAS_USE_VecGeom)
   endif()
 endif()
 
-add_library(celeritas ${SOURCES})
-add_library(Celeritas::Core ALIAS celeritas)
-target_link_libraries(celeritas
-  PRIVATE ${PRIVATE_DEPS}
-  PUBLIC ${PUBLIC_DEPS}
-)
+#add_library(celeritas ${SOURCES})
+#add_library(Celeritas::Core ALIAS celeritas)
+#target_link_libraries(celeritas
+#  PRIVATE ${PRIVATE_DEPS}
+#  PUBLIC ${PUBLIC_DEPS}
+#)
 
-target_include_directories(celeritas
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-)
+#target_include_directories(celeritas
+#  PUBLIC
+#    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+#    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+#    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+#)
 
-install(TARGETS celeritas
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
+#install(TARGETS celeritas
+#  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#)
 
 foreach(_SUBDIR base geom)
   file(GLOB _HEADERS
