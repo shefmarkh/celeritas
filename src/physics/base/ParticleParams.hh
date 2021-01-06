@@ -9,7 +9,8 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
+#include <tr1/unordered_map>
+#include <tr1/functional>
 #include <vector>
 #include "base/DeviceVector.hh"
 #include "ParticleParamsPointers.hh"
@@ -73,10 +74,10 @@ class ParticleParams
     VecMd md_;
 
     // Map particle names to registered IDs
-    std::unordered_map<std::string, ParticleDefId> name_to_id_;
+    std::tr1::unordered_map<std::string, ParticleDefId> name_to_id_;
 
     // Map particle codes to registered IDs
-    std::unordered_map<PDGNumber, ParticleDefId> pdg_to_id_;
+    std::tr1::unordered_map<PDGNumber, ParticleDefId> pdg_to_id_;
 
     // Host copy of definitions for host construction of other classes
     std::vector<ParticleDef> host_defs_;

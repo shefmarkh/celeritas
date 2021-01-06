@@ -10,7 +10,7 @@
 #include <type_traits>
 #include "DeviceAllocation.hh"
 #include "detail/InitializedValue.hh"
-
+#include <alpaka/alpaka.hpp>
 namespace celeritas
 {
 //---------------------------------------------------------------------------//
@@ -86,4 +86,4 @@ inline void swap(DeviceVector<T>&, DeviceVector<T>&) noexcept;
 //---------------------------------------------------------------------------//
 } // namespace celeritas
 
-#include "DeviceVector.cu"
+#include "DeviceVector.i.hh"

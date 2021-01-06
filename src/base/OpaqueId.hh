@@ -9,7 +9,7 @@
 
 #include <cstddef>
 #ifndef __CUDA_ARCH__
-#    include <functional>
+#    include <tr1/functional>
 #endif
 #include "Assert.hh"
 #include "Macros.hh"
@@ -130,13 +130,13 @@ namespace std
 {
 //! Specialization for std::hash for unordered storage.
 template<class I, class T>
-struct hash<celeritas::OpaqueId<I, T>>
+struct tr1::hash<celeritas::OpaqueId<I, T>>
 {
     using argument_type = celeritas::OpaqueId<I, T>;
     using result_type   = std::size_t;
     result_type operator()(const argument_type& id) const noexcept
     {
-        return std::hash<T>()(id.unchecked_get());
+        return std::tr1::hash<T>()(id.unchecked_get());
     }
 };
 } // namespace std
