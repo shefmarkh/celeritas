@@ -6,15 +6,28 @@
 //! \file DeviceVector.i.hh
 //---------------------------------------------------------------------------//
 
+using Dim = alpaka::dim::DimInt<1>;
+//Hard code for GPU right now for initial testing.
+//Eventually template class on Acc so we can switch?
+using Acc = alpaka::acc::AccGpuCudaRt<Dim, uint32_t>;
+//Make the first device (GPU) available
+static auto const device = alpaka::pltf::getDevByIdx<Acc>(0u);
+
 namespace celeritas
 {
+
+//Default constructor (assumes sixe of zero)
+template<class T>
+DeviceVector<T>::DeviceVector() :  allocation_(), size_(0), bufferExtent_(static_cast<uint32_t>(0)), allocatedMemory_(alpaka::mem::buf::alloc<T,uint32_t>(device,bufferExtent_)) {};
+
+
 //---------------------------------------------------------------------------//
 /*!
  * Construct with a number of allocated elements.
  */
 template<class T>
 DeviceVector<T>::DeviceVector(size_type count)
-    : allocation_(count * sizeof(T)), size_(count)
+    :  allocation_(count * sizeof(T)), size_(count), bufferExtent_{static_cast<uint32_t>(count)},  allocatedMemory_(alpaka::mem::buf::alloc<T,uint32_t>(device,bufferExtent_))
 {
 }
 
