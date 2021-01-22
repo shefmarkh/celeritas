@@ -24,8 +24,7 @@ namespace celeritas
 //Default constructor (assumes sixe of zero)
 template<class T>
 DeviceVector<T>::DeviceVector() : bufferExtent_(static_cast<uint32_t>(0)), 
-allocatedMemory_(alpaka::mem::buf::alloc<T,uint32_t>(device,bufferExtent_)),
-allocatedHostMemory_(alpaka::mem::buf::alloc<T,uint32_t>(devHost,bufferExtent_)) {};
+allocatedMemory_(alpaka::mem::buf::alloc<T,uint32_t>(device,bufferExtent_)) {};
 
 
 //---------------------------------------------------------------------------//
@@ -34,8 +33,7 @@ allocatedHostMemory_(alpaka::mem::buf::alloc<T,uint32_t>(devHost,bufferExtent_))
  */
 template<class T>
 DeviceVector<T>::DeviceVector(size_type count)
-    :  bufferExtent_{static_cast<uint32_t>(count)},  allocatedMemory_(alpaka::mem::buf::alloc<T,uint32_t>(device,bufferExtent_)),
-    allocatedHostMemory_(alpaka::mem::buf::alloc<T,uint32_t>(devHost,bufferExtent_))
+    :  bufferExtent_{static_cast<uint32_t>(count)},  allocatedMemory_(alpaka::mem::buf::alloc<T,uint32_t>(device,bufferExtent_))    
 {
 }
 

@@ -79,8 +79,7 @@ class DeviceVector
 
   private:  
     alpaka::vec::Vec<alpaka::dim::DimInt<1>, uint32_t> bufferExtent_;
-    alpaka::mem::buf::BufUniformCudaHipRt<T, alpaka::dim::DimInt<1UL>, uint32_t> allocatedMemory_;
-    alpaka::mem::buf::BufCpu<T, alpaka::dim::DimInt<1UL>, uint32_t> allocatedHostMemory_;
+    alpaka::mem::buf::BufUniformCudaHipRt<T, alpaka::dim::DimInt<1UL>, uint32_t> allocatedMemory_;    
 };
 
 // Swap two vectors
