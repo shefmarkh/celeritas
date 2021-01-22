@@ -8,7 +8,8 @@
 #pragma once
 
 #include <type_traits>
-#include "DeviceAllocation.hh"
+#include "Span.hh"
+#include "Types.hh"
 #include "detail/InitializedValue.hh"
 #include <alpaka/alpaka.hpp>
 
@@ -57,10 +58,10 @@ class DeviceVector
     // >>> ACCESSORS
 
     //! Get the number of elements allocated
-    size_type size() const { return size_; }
+    size_type size() const { return (bufferExtent_.maxElem()+1); }
 
     //! Whether any elements are stored
-    bool empty() const { return size_ == 0; }
+    bool empty() const { return bufferExtent_.maxElem() == 0; }
 
     // >>> DEVICE ACCESSORS
 
@@ -76,11 +77,10 @@ class DeviceVector
     // Get a const view to device data
     inline constSpan_t device_pointers() const;
 
-  private:
-    DeviceAllocation allocation_;
-    detail::InitializedValue<size_type> size_;
+  private:  
     alpaka::vec::Vec<alpaka::dim::DimInt<1>, uint32_t> bufferExtent_;
     alpaka::mem::buf::BufUniformCudaHipRt<T, alpaka::dim::DimInt<1UL>, uint32_t> allocatedMemory_;
+    alpaka::mem::buf::BufCpu<T, alpaka::dim::DimInt<1UL>, uint32_t> allocatedHostMemory_;
 };
 
 // Swap two vectors
