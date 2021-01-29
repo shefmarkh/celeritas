@@ -58,10 +58,10 @@ class DeviceVector
     // >>> ACCESSORS
 
     //! Get the number of elements allocated
-    size_type size() const { return (bufferExtent_.maxElem()+1); }
+    size_type size() const { return bufferExtent_.max(); }
 
     //! Whether any elements are stored
-    bool empty() const { return bufferExtent_.maxElem() == 0; }
+    bool empty() const { return bufferExtent_.max() == 0; }
 
     // >>> DEVICE ACCESSORS
 

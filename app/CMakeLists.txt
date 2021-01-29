@@ -183,6 +183,8 @@ else()
     ../../src/base/KernelParamCalculator.cuda.cc
     ../src/base/Memory.cu
     ../src/base/DeviceAllocation.alpaka.cu
+    ../src/physics/base/SecondaryAllocatorStore.cu
+    ../src/physics/base/ParticleStateStore.cu
   )
 
   set(_CONFIG_NAME "celeritas_config.h")

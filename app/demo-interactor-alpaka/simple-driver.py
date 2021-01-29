@@ -39,6 +39,7 @@ result = subprocess.run([exe, '-'],
                         stdout=subprocess.PIPE)
 if result.returncode:
     print("Run failed with error", result.returncode)
+    print(result.stdout.decode())
     exit(result.returncode)
 
 print("Received {} bytes of data".format(len(result.stdout)))

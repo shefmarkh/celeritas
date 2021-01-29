@@ -10,8 +10,8 @@
 #include "base/Range.hh"
 #include "base/Stopwatch.hh"
 //#include "random/cuda/RngStateStore.hh"
-//#include "physics/base/ParticleStateStore.hh"
-//#include "physics/base/SecondaryAllocatorStore.hh"
+#include "physics/base/ParticleStateStore.hh"
+#include "physics/base/SecondaryAllocatorStore.hh"
 //#include "physics/base/Units.hh"
 #include "DetectorStore.hh"
 #include "base/DeviceVector.hh"
@@ -32,6 +32,7 @@ KNDemoRunner::KNDemoRunner(constSPParticleParams     particles,
     , xsparams_(std::move(xs))
     , launch_params_(std::move(solver))
 {
+    
     REQUIRE(pparams_);
     REQUIRE(xsparams_);
     REQUIRE(launch_params_.block_size > 0);
@@ -65,14 +66,14 @@ auto KNDemoRunner::operator()(KNDemoRunArgs args) -> result_type
     Stopwatch total_time;
 
     // Allocate device data
-    //SecondaryAllocatorStore secondaries(args.num_tracks);
-    //ParticleStateStore      track_states(args.num_tracks);
+    SecondaryAllocatorStore secondaries(args.num_tracks);
+    ParticleStateStore      track_states(args.num_tracks);
     //RngStateStore           rng_states(args.num_tracks, args.seed);
-    //DeviceVector<Real3>     position(args.num_tracks);
-    //DeviceVector<Real3>     direction(args.num_tracks);
-    //DeviceVector<double>    time(args.num_tracks);
-    //DeviceVector<bool>      alive(args.num_tracks);
-    //DetectorStore           detector(args.num_tracks, args.tally_grid);
+    DeviceVector<Real3>     position(args.num_tracks);
+    DeviceVector<Real3>     direction(args.num_tracks);
+    DeviceVector<double>    time(args.num_tracks);
+    DeviceVector<bool>      alive(args.num_tracks);
+    DetectorStore           detector(args.num_tracks, args.tally_grid);
 
     // Construct pointers to device data
     //ParamPointers params;
