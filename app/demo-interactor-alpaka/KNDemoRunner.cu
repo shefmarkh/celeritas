@@ -76,14 +76,14 @@ auto KNDemoRunner::operator()(KNDemoRunArgs args) -> result_type
     DetectorStore           detector(args.num_tracks, args.tally_grid);
 
     // Construct pointers to device data
-    //ParamPointers params;
-    //params.particle      = pparams_->device_pointers();
-    //params.xs            = xsparams_->device_pointers();
-    //params.kn_interactor = kn_pointers_;
+    ParamPointers params;
+    params.particle      = pparams_->device_pointers();
+    params.xs            = xsparams_->device_pointers();
+    params.kn_interactor = kn_pointers_;
 
-    //InitialPointers initial;
-    //initial.particle = ParticleTrackState{kn_pointers_.gamma_id,
-    //                                      units::MevEnergy{args.energy}};
+    InitialPointers initial;
+    initial.particle = ParticleTrackState{kn_pointers_.gamma_id,
+                                          units::MevEnergy{args.energy}};
 
     //StatePointers state;
     //state.particle  = track_states.device_pointers();
