@@ -87,4 +87,4 @@ class GenerateCanonical<RngEngine, double>
 //---------------------------------------------------------------------------//
 } // namespace celeritas
 
-#include "RngEngine.i.cuh"
+//#include "RngEngine.i.cuh"

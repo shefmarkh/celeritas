@@ -185,6 +185,10 @@ else()
     ../src/base/DeviceAllocation.alpaka.cu
     ../src/physics/base/SecondaryAllocatorStore.cu
     ../src/physics/base/ParticleStateStore.cu
+    #random numbers
+    ../src/random/cuda/RngStateStore.cu
+    ../src/random/cuda/RngStateInit.cu
+    ../src/random/cuda/RngEngine.cu
   )
 
   set(_CONFIG_NAME "celeritas_config.h")

@@ -9,7 +9,7 @@
 
 #include "base/Range.hh"
 #include "base/Stopwatch.hh"
-//#include "random/cuda/RngStateStore.hh"
+#include "random/cuda/RngStateStore.hh"
 #include "physics/base/ParticleStateStore.hh"
 #include "physics/base/SecondaryAllocatorStore.hh"
 //#include "physics/base/Units.hh"
@@ -68,7 +68,7 @@ auto KNDemoRunner::operator()(KNDemoRunArgs args) -> result_type
     // Allocate device data
     SecondaryAllocatorStore secondaries(args.num_tracks);
     ParticleStateStore      track_states(args.num_tracks);
-    //RngStateStore           rng_states(args.num_tracks, args.seed);
+    RngStateStore           rng_states(args.num_tracks, args.seed);
     DeviceVector<Real3>     position(args.num_tracks);
     DeviceVector<Real3>     direction(args.num_tracks);
     DeviceVector<double>    time(args.num_tracks);
