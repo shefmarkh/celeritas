@@ -56,10 +56,10 @@ with open('demo-interactor.json', 'w') as f:
     json.dump(out, f, indent=1)
 
 result = out['result']
-#num_tracks = result['alive'][0]
-#num_iters = len(result['edep'])
-#num_track_steps = sum(result['alive'])
-#print("Number of steps:", num_iters,
-#      "(average", num_track_steps / num_tracks, "per track)")
-#print("Fraction of time in kernel:", sum(result['time']) /
-#        result['total_time'])
+num_tracks = result['alive'][0]
+num_iters = len(result['edep'])
+num_track_steps = sum(result['alive'])
+print("Number of steps:", num_iters,
+      "(average", num_track_steps / num_tracks, "per track)")
+print("Fraction of time in kernel:", sum(result['time']) /
+        result['total_time'])

@@ -85,17 +85,17 @@ auto KNDemoRunner::operator()(KNDemoRunArgs args) -> result_type
     initial.particle = ParticleTrackState{kn_pointers_.gamma_id,
                                           units::MevEnergy{args.energy}};
 
-    //StatePointers state;
-    //state.particle  = track_states.device_pointers();
-    //state.rng       = rng_states.device_pointers();
-    //state.position  = position.device_pointers();
-    //state.direction = direction.device_pointers();
-    //state.time      = time.device_pointers();
-    //state.alive     = alive.device_pointers();
+    StatePointers state;
+    state.particle  = track_states.device_pointers();
+    state.rng       = rng_states.device_pointers();
+    state.position  = position.device_pointers();
+    state.direction = direction.device_pointers();
+    state.time      = time.device_pointers();
+    state.alive     = alive.device_pointers();
 
     // Initialize particle states
-    //initialize(launch_params_, params, state, initial);
-    /*
+    initialize(launch_params_, params, state, initial);
+    
     result.alive.push_back(args.num_tracks);
 
     size_type remaining_steps = args.max_steps;
@@ -134,7 +134,7 @@ auto KNDemoRunner::operator()(KNDemoRunArgs args) -> result_type
 
     // Store total time
     result.total_time = total_time();
-    */
+    
     return result;
 }
 
