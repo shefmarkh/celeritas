@@ -7,7 +7,7 @@
 //---------------------------------------------------------------------------//
 #include "KNDemoKernel.hh"
 
-#include <alpaka/alpaka.hpp>
+//#include <alpaka/alpaka.hpp>
 
 #include <thrust/device_ptr.h>
 #include <thrust/reduce.h>
@@ -56,6 +56,7 @@ __global__ void initialize_kn(ParamPointers const   params,
     }
 }
 
+/*
 using namespace alpaka;
 
 struct initialize_alpaka{
@@ -74,6 +75,7 @@ struct initialize_alpaka{
 
   }
 };
+*/
 
 //---------------------------------------------------------------------------//
 /*!

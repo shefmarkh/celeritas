@@ -91,7 +91,7 @@ template<class T>
 auto DeviceVector<T>::device_pointers() -> Span_t
 {   
   T* devicePtr = alpaka::mem::view::getPtrNative(allocatedMemory_);  
-  return {devicePtr,static_cast<size_type>((bufferExtent_.maxElem()+1))};
+  return {devicePtr,this->size()};
 }
 
 //---------------------------------------------------------------------------//
@@ -103,7 +103,7 @@ template<class T>
 auto DeviceVector<T>::device_pointers() const -> constSpan_t
 {    
     const T* devicePtr = reinterpret_cast<const T*>(alpaka::mem::view::getPtrNative(allocatedMemory_));
-    return {devicePtr,static_cast<size_type>((bufferExtent_.maxElem()+1))};
+    return {devicePtr,this->size()};
 }
 
 //---------------------------------------------------------------------------//
