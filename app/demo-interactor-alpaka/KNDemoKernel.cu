@@ -7,7 +7,7 @@
 //---------------------------------------------------------------------------//
 #include "KNDemoKernel.hh"
 
-//#include <alpaka/alpaka.hpp>
+#include <alpaka/alpaka.hpp>
 
 #include <thrust/device_ptr.h>
 #include <thrust/reduce.h>
@@ -56,12 +56,18 @@ __global__ void initialize_kn(ParamPointers const   params,
     }
 }
 
-/*
+
 using namespace alpaka;
+
+//Define shortcuts for some alpaka items we will use
+using Dim = dim::DimInt<1>;
+using Idx = uint32_t;
+//Define the alpaka accelerator to be Nvidia GPU
+using Acc = acc::AccGpuCudaRt<Dim,Idx>;
 
 struct initialize_alpaka{
   template <typename Acc>
-  ALPAKA_FN_ACC void operator()(Acc const &acc,ParamPointers const params,StatePointers const states,InitialPointers const init){
+  ALPAKA_FN_ACC void operator()(Acc const &acc,ParamPointers const params,StatePointers const states,InitialPointers const init) const {
     for(int tid = idx::getIdx<Grid, Threads>(acc)[0];tid < static_cast<int>(states.size());tid += blockDim.x * gridDim.x){
       ParticleTrackView particle(params.particle, states.particle, ThreadId(tid));
       particle = init.particle;
@@ -75,7 +81,7 @@ struct initialize_alpaka{
 
   }
 };
-*/
+
 
 //---------------------------------------------------------------------------//
 /*!
@@ -168,6 +174,86 @@ __global__ void iterate_kn(ParamPointers const              params,
     }
 }
 
+struct iterate_alpaka{
+  template <typename Acc>
+  ALPAKA_FN_ACC void operator()(Acc const &acc,ParamPointers const params, StatePointers const states, SecondaryAllocatorPointers const secondaries, DetectorPointers const detector) const{
+
+    SecondaryAllocatorView allocate_secondaries(secondaries);
+    DetectorView           detector_hit(detector);
+    PhysicsArrayCalculator calc_xs(params.xs);
+
+    for(int tid = idx::getIdx<Grid, Threads>(acc)[0];tid < static_cast<int>(states.size());tid += blockDim.x * gridDim.x){
+
+      // Skip loop if already dead
+      if (!states.alive[tid])
+      {
+          continue;
+      }
+
+      // Construct particle accessor from immutable and thread-local data
+      ParticleTrackView particle(
+          params.particle, states.particle, ThreadId(tid));
+      RngEngine rng(states.rng, ThreadId(tid));
+
+      // Move to collision
+      {
+          // Calculate cross section at the particle's energy
+          real_type                          sigma = calc_xs(particle);
+          ExponentialDistribution<real_type> sample_distance(sigma);
+          // Sample distance-to-collision
+          real_type distance = sample_distance(rng);
+          // Move particle
+          axpy(distance, states.direction[tid], &states.position[tid]);
+          // Update time
+          states.time[tid] += distance * unit_cast(particle.speed());
+      }
+
+      Hit h;
+      h.pos    = states.position[tid];
+      h.thread = ThreadId(tid);
+      h.time   = states.time[tid];
+
+      if (particle.energy() < KleinNishinaInteractor::min_incident_energy())
+      {
+          // Particle is below interaction energy
+          h.dir              = states.direction[tid];
+          h.energy_deposited = particle.energy();
+
+          // Deposit energy and kill
+          detector_hit(h);
+          states.alive[tid] = false;
+          continue;
+      }
+
+      // Construct RNG and interaction interfaces
+      KleinNishinaInteractor interact(params.kn_interactor,
+                                      particle,
+                                      states.direction[tid],
+                                      allocate_secondaries);
+
+      // Perform interaction: should emit a single particle (an electron)
+      Interaction interaction = interact(rng);
+      CHECK(interaction);
+      CHECK(interaction.secondaries.size() == 1);
+
+      // Deposit energy from the secondary (effectively, an infinite energy
+      // cutoff)
+      {
+          const auto& secondary = interaction.secondaries.front();
+          h.dir                 = secondary.direction;
+          h.energy_deposited    = secondary.energy;
+          detector_hit(h);
+      }
+
+      // Update post-interaction state (apply interaction)
+      states.direction[tid] = interaction.direction;
+      particle.energy(interaction.energy);
+
+    }
+
+  }
+};
+
 //---------------------------------------------------------------------------//
 // HOST INTERFACES
 //---------------------------------------------------------------------------//
@@ -181,7 +267,18 @@ void initialize(const CudaGridParams&  grid,
 {
     REQUIRE(states.alive.size() == states.size());
     REQUIRE(states.rng.size() == states.size());
-    initialize_kn<<<grid.grid_size, grid.block_size>>>(params, states, initial);
+    //initialize_kn<<<grid.grid_size, grid.block_size>>>(params, states, initial);
+  
+    //Get the first device available of type GPU (i.e should be our sole GPU)/device
+    auto const device = pltf::getDevByIdx<Acc>(0u);
+    auto queue = queue::Queue<Acc, queue::Blocking>{device};
+    auto workDiv = workdiv::WorkDivMembers<Dim, Idx>{static_cast<uint32_t>(grid.block_size), static_cast<uint32_t>(grid.grid_size), static_cast<uint32_t>(1)};
+
+    //Create a task for processEvent, that we can run and then run it via a queue
+    initialize_alpaka initialize_alpaka;
+    auto taskInitialize = kernel::createTaskKernel<Acc>(workDiv,initialize_alpaka,params,states,initial);
+    queue::enqueue(queue, taskInitialize);
+
 }
 
 //---------------------------------------------------------------------------//
@@ -194,12 +291,23 @@ void iterate(const CudaGridParams&              grid,
              const SecondaryAllocatorPointers&  secondaries,
              const celeritas::DetectorPointers& detector)
 {
-    iterate_kn<<<grid.grid_size, grid.block_size>>>(
-        params, state, secondaries, detector);
+    //iterate_kn<<<grid.grid_size, grid.block_size>>>(
+    //    params, state, secondaries, detector);
 
     // Note: the device synchronize is useful for debugging and necessary for
     // timing diagnostics.
-    CELER_CUDA_CALL(cudaDeviceSynchronize());
+    //CELER_CUDA_CALL(cudaDeviceSynchronize());
+
+    //Get the first device available of type GPU (i.e should be our sole GPU)/device
+    auto const device = pltf::getDevByIdx<Acc>(0u);
+    auto queue = queue::Queue<Acc, queue::Blocking>{device};
+    auto workDiv = workdiv::WorkDivMembers<Dim, Idx>{static_cast<uint32_t>(grid.block_size), static_cast<uint32_t>(grid.grid_size), static_cast<uint32_t>(1)};
+
+    //Create a task for iterate, that we can run and then run it via a queue
+    iterate_alpaka iterate_alpaka;
+    auto taskIterate = kernel::createTaskKernel<Acc>(workDiv,iterate_alpaka,params, state, secondaries, detector);
+    queue::enqueue(queue, taskIterate);
+
 }
 
 //---------------------------------------------------------------------------//
