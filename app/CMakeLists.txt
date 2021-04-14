@@ -135,6 +135,71 @@ if(CELERITAS_BUILD_DEMOS)
 endif()
 
 #-----------------------------------------------------------------------------#
+# DEMO: physics interactions with Alpaka
+#-----------------------------------------------------------------------------#
+
+find_package(alpaka QUIET)
+find_package(nlohmann_json)
+
+if(NOT alpaka_FOUND)
+  message(STATUS "No alpaka install found, disabling build of FisherPrice_Alpaka")
+else()
+
+  configure_file("../src/celeritas_config.h.in" "celeritas_config.h" @ONLY)
+  install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/celeritas_config.h"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+  )
+
+  configure_file("../src/celeritas_version.cc.in" "celeritas_version.cc" @ONLY)
+
+  alpaka_add_executable(demo-interactor-alpaka demo-interactor-alpaka/demo-interactor-alpaka.cc    
+    demo-interactor-alpaka/KNDemoKernel.cu
+    demo-interactor-alpaka/KNDemoKernel.thrust.cu
+    demo-interactor-alpaka/KNDemoIO.cc
+    demo-interactor-alpaka/KNDemoRunner.cc
+    demo-interactor-alpaka/LoadXs.cc
+    demo-interactor-alpaka/XsGridParams.cc
+    ../src/physics/base/ParticleParams.cc
+    ../src/comm/DeviceIO.json.cc
+    ../src/comm/KernelDiagnosticsIO.json.cc
+    ../src/comm/Device.cc
+    ../src/base/Assert.cc
+    ../src/comm/Logger.cc
+    ../src/comm/LoggerTypes.cc
+    ../src/comm/detail/LoggerMessage.cc
+    ../src/comm/ScopedMpiInit.cc
+    ../src/comm/Communicator.cc
+    ../src/comm/KernelDiagnostics.cc
+    ../src/base/DeviceAllocation.cc
+    ../src/base/ColorUtils.cc
+    ../src/base/KernelParamCalculator.cuda.cc
+    ../src/base/detail/Copier.cc
+    ../src/base/detail/Filler.cu
+    ../src/random/RngInterface.cc
+    ../src/random/detail/RngStateInit.cu
+    ${CMAKE_CURRENT_BINARY_DIR}/celeritas_version.cc
+  )
+
+
+  target_include_directories(demo-interactor-alpaka
+  PUBLIC    
+    "${CMAKE_CURRENT_BINARY_DIR}"
+    ../src/
+  )
+
+
+  target_link_libraries(demo-interactor-alpaka PRIVATE 
+    CUDA::cudart
+    nlohmann_json::nlohmann_json
+    alpaka::alpaka
+    ${Boost_LIBRARIES}
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  )
+ endif()
+
+
+#-----------------------------------------------------------------------------#
 # DEMO: geometry tracking
 #-----------------------------------------------------------------------------#
 
