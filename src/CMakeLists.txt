@@ -149,28 +149,28 @@ if(CELERITAS_USE_VecGeom)
   endif()
 endif()
 
-add_library(celeritas ${SOURCES})
-add_library(Celeritas::Core ALIAS celeritas)
+#add_library(celeritas ${SOURCES})
+#add_library(Celeritas::Core ALIAS celeritas)
 
-target_link_libraries(celeritas
-  PRIVATE ${PRIVATE_DEPS}
-  PUBLIC ${PUBLIC_DEPS}
-)
-if(CELERITAS_USE_VecGeom AND CELERITAS_USE_CUDA)
-  celeritas_link_vecgeom_cuda(celeritas)
-endif()
+#target_link_libraries(celeritas
+#  PRIVATE ${PRIVATE_DEPS}
+#  PUBLIC ${PUBLIC_DEPS}
+#)
+#if(CELERITAS_USE_VecGeom AND CELERITAS_USE_CUDA)
+#  celeritas_link_vecgeom_cuda(celeritas)
+#endif()
 
-target_include_directories(celeritas
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-)
+#target_include_directories(celeritas
+#  PUBLIC
+#    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+#    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+#    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+#)
 
-install(TARGETS celeritas
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
+#install(TARGETS celeritas
+#  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#)
 
 install(FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/celeritas_version.h"
@@ -221,12 +221,12 @@ if(CELERITAS_USE_ROOT)
   )
 else()
   # ROOT is disabled: add an importer that
-  add_library(celeritas_root
-    io/RootImporter.noroot.cc
-  )
-  target_link_libraries(celeritas_root PRIVATE celeritas)
+  #add_library(celeritas_root
+  #  io/RootImporter.noroot.cc
+  #)
+  #target_link_libraries(celeritas_root PRIVATE celeritas)
 endif()
 
-add_library(Celeritas::ROOT ALIAS celeritas_root)
+#add_library(Celeritas::ROOT ALIAS celeritas_root)
 
 #---------------------------------------------------------------------------##
