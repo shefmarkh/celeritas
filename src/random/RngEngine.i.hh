@@ -25,7 +25,7 @@ RngEngine::RngEngine(const StateRef& state, const ThreadId& id)
 /*!
  * Initialize the RNG engine with a seed value.
  */
-CELER_FUNCTION RngEngine& RngEngine::operator=(const Initializer_t& s)
+__device__ RngEngine& RngEngine::operator=(const Initializer_t& s)
 {
     curand_init(s.seed, 0, 0, state_);
     return *this;
@@ -35,7 +35,7 @@ CELER_FUNCTION RngEngine& RngEngine::operator=(const Initializer_t& s)
 /*!
  * Sample a random number.
  */
-CELER_FUNCTION auto RngEngine::operator()() -> result_type
+__device__ auto RngEngine::operator()() -> result_type
 {
     return curand(state_);
 }
@@ -46,7 +46,7 @@ CELER_FUNCTION auto RngEngine::operator()() -> result_type
 /*!
  * Specialization for RngEngine (float).
  */
-CELER_FUNCTION float
+__device__ float
 GenerateCanonical<RngEngine, float>::operator()(RngEngine& rng)
 {
     return curand_uniform(rng.state_);
@@ -56,7 +56,7 @@ GenerateCanonical<RngEngine, float>::operator()(RngEngine& rng)
 /*!
  * Specialization for RngEngine (double).
  */
-CELER_FUNCTION double
+__device__ double
 GenerateCanonical<RngEngine, double>::operator()(RngEngine& rng)
 {
     return curand_uniform_double(rng.state_);

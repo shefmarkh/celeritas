@@ -11,6 +11,7 @@
 #include "DeviceAllocation.hh"
 #include "Span.hh"
 #include "detail/InitializedValue.hh"
+#include "alpaka/alpaka.hpp"
 
 namespace celeritas
 {
