@@ -53,6 +53,33 @@ __global__ void initialize_kernel(ParamsDeviceRef const params,
     states.alive[tid]     = true;
 }
 
+using namespace alpaka;
+
+//Define shortcuts for some alpaka items we will use
+using Dim = dim::DimInt<1>;
+using Idx = uint32_t;
+//Define the alpaka accelerator to be Nvidia GPU
+using Acc = acc::AccGpuCudaRt<Dim,Idx>;
+
+struct initialize_kernel_alpaka{
+  template <typename Acc>
+  ALPAKA_FN_ACC void operator()(Acc const &acc,ParamsDeviceRef const params,StateDeviceRef const  states,InitialPointers const init) const {
+
+    unsigned int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid >= states.size()) return;
+    
+    ParticleTrackView particle(params.particle, states.particle, ThreadId(tid));
+    particle = init.particle;
+
+    // Particles begin alive and in the +z direction
+    states.direction[tid] = {0, 0, 1};
+    states.position[tid]  = {0, 0, 0};
+    states.time[tid]      = 0;
+    states.alive[tid]     = true;
+
+  }
+};
+
 //---------------------------------------------------------------------------//
 /*!
  * Sample cross sections and move to the collision point.
@@ -81,6 +108,7 @@ move_kernel(ParamsDeviceRef const params, StateDeviceRef const states)
                                        &states.time[tid],
                                        rng);
 }
+
 
 //---------------------------------------------------------------------------//
 /*!
