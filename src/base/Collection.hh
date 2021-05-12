@@ -119,6 +119,11 @@ class CollectionBuilder;
 /*!
  * Sentinel class for obtaining a view to all items of a collection.
  */
+ //In the usual celeritas setup host is native - but in the Alpaka setup we have to use nvcc instead of gcc for any
+ //code that has a #include of an Alpaka header file. Then native would be device, but in fact we need this to be host
+ //for demo-interactor.
+ //Other applications may need this to be device, and then something more sophisticated to do the switching 
+ //would be needed.
 template<class T, MemSpace M = MemSpace::host>
 struct AllItems
 {

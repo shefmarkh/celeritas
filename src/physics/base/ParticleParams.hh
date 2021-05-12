@@ -13,7 +13,12 @@
 #include <vector>
 #include "base/CollectionMirror.hh"
 #include "ParticleInterface.hh"
-#define MARK true
+//In the usual celeritas setup the MemHost::native is defined as host or device based on the compiler type being used (gcc or nvcc)
+//But Alpaka forces many things compiled with gcc to be compiled with nvcc, because any code with a #include of an Alpaka header must
+//be compiled with nvcc.
+//To emulate the behaviour of the native switching for code switched from gcc to nvcc in the Alpaka setup we use a #define to allow
+//to switch native to host (else it would be device because nvcc is being used)
+#define SPECIFY_HOST_EXPLICITLY true
 #include "ParticleView.hh"
 #include "PDGNumber.hh"
 

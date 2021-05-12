@@ -23,7 +23,8 @@ class ParticleView
   public:
     //!@{
     //! Type aliases
-    #ifdef MARK
+    //SPECIFY_HOST_EXPLICITLY is explained in the ParticleParams.hh header file.
+    #ifdef SPECIFY_HOST_EXPLICITLY 
     using ParticleParamsRef
         = ParticleParamsData<Ownership::const_reference, MemSpace::host>;
     #else
