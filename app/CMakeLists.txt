@@ -84,14 +84,14 @@ else()
 
   configure_file("../src/celeritas_version.cc.in" "celeritas_version.cc" @ONLY)
 
-  alpaka_add_executable(demo-interactor-alpaka demo-interactor-alpaka/demo-interactor-alpaka.cc   
+  alpaka_add_executable(demo-interactor-alpaka demo-interactor-alpaka/demo-interactor-alpaka.cu   
     demo-interactor-alpaka/KNDemoKernel.cu
     demo-interactor-alpaka/KNDemoKernel.thrust.cu
-    demo-interactor-alpaka/KNDemoIO.cc
-    demo-interactor-alpaka/KNDemoRunner.cc
-    demo-interactor-alpaka/LoadXs.cc
-    demo-interactor-alpaka/XsGridParams.cc
-    ../src/physics/base/ParticleParams.cc
+    demo-interactor-alpaka/KNDemoIO.cu
+    demo-interactor-alpaka/KNDemoRunner.cu
+    demo-interactor-alpaka/LoadXs.cu
+    demo-interactor-alpaka/XsGridParams.cu
+    ../src/physics/base/ParticleParams.cu
     ../src/comm/DeviceIO.json.cc
     ../src/comm/KernelDiagnosticsIO.json.cc
     ../src/comm/Device.cc
@@ -107,7 +107,7 @@ else()
     ../src/base/KernelParamCalculator.cuda.cc
     ../src/base/detail/Copier.cc
     ../src/base/detail/Filler.cu
-    ../src/random/RngInterface.cc
+    ../src/random/RngInterface.cu
     ../src/random/detail/RngStateInit.cu
     ${CMAKE_CURRENT_BINARY_DIR}/celeritas_version.cc
   )

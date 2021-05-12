@@ -13,6 +13,7 @@
 #include <vector>
 #include "base/CollectionMirror.hh"
 #include "ParticleInterface.hh"
+#define MARK true
 #include "ParticleView.hh"
 #include "PDGNumber.hh"
 

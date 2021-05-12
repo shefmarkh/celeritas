@@ -119,7 +119,7 @@ class CollectionBuilder;
 /*!
  * Sentinel class for obtaining a view to all items of a collection.
  */
-template<class T, MemSpace M = MemSpace::native>
+template<class T, MemSpace M = MemSpace::host>
 struct AllItems
 {
 };

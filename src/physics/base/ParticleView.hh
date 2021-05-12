@@ -23,8 +23,14 @@ class ParticleView
   public:
     //!@{
     //! Type aliases
+    #ifdef MARK
+    using ParticleParamsRef
+        = ParticleParamsData<Ownership::const_reference, MemSpace::host>;
+    #else
     using ParticleParamsRef
         = ParticleParamsData<Ownership::const_reference, MemSpace::native>;
+    #endif
+    
     //!@}
 
   public:

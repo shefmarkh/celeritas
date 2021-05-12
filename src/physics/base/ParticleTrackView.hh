@@ -31,6 +31,7 @@ class ParticleTrackView
   public:
     //!@{
     //! Type aliases
+    
     using ParticleParamsRef
         = ParticleParamsData<Ownership::const_reference, MemSpace::native>;
     using ParticleStateRef
