@@ -6,15 +6,26 @@
 //! \file DeviceVector.i.hh
 //---------------------------------------------------------------------------//
 
+using Dim = alpaka::dim::DimInt<1>;
+//Hard code for GPU right now for initial testing.
+//Eventually template class on Acc so we can switch?
+using Acc = alpaka::acc::AccGpuCudaRt<Dim, uint32_t>;
+
 namespace celeritas
 {
+
+//Default constructor (assumes sixe of zero)
+template<class T>
+DeviceVector<T>::DeviceVector() : bufferExtent_(static_cast<uint32_t>(0)), size_(0),
+allocatedMemory_(alpaka::mem::buf::alloc<T,uint32_t>(alpaka::pltf::getDevByIdx<Acc>(0u),bufferExtent_)) {};
+
 //---------------------------------------------------------------------------//
 /*!
  * Construct with a number of allocated elements.
  */
 template<class T>
 DeviceVector<T>::DeviceVector(size_type count)
-    : allocation_(count * sizeof(T)), size_(count), capacity_(count)
+    :  bufferExtent_{static_cast<uint32_t>(count)},  size_(count), allocatedMemory_(alpaka::mem::buf::alloc<T,uint32_t>(alpaka::pltf::getDevByIdx<Acc>(0u),bufferExtent_))
 {
 }
 
@@ -27,9 +38,9 @@ void DeviceVector<T>::swap(DeviceVector& other) noexcept
 {
     using std::swap;
     swap(size_, other.size_);
-    swap(capacity_, other.capacity_);
-    swap(allocation_, other.allocation_);
-}
+    swap(bufferExtent_, other.bufferExtent_);
+    swap(allocatedMemory_, other.allocatedMemory_);
+}  
 
 //---------------------------------------------------------------------------//
 /*!
@@ -53,8 +64,16 @@ template<class T>
 void DeviceVector<T>::copy_to_device(SpanConstT data)
 {
     CELER_EXPECT(data.size() == this->size());
-    allocation_.copy_to_device(
-        {reinterpret_cast<const Byte*>(data.data()), data.size() * sizeof(T)});
+    //Create a local memory buffer for the host data
+    auto hostMemoryBuffer(alpaka::mem::buf::alloc<T,uint32_t>(alpaka::pltf::getDevByIdx<alpaka::dev::DevCpu>(0u),bufferExtent_));
+    //Now make the pointers in that buffer point at the data in the Span (data) passed into this function
+    for (uint32_t counter = 0; counter < this->size(); counter++) alpaka::mem::view::getPtrNative(hostMemoryBuffer)[counter] = data[counter];   
+    //Make the first device (GPU) available
+    auto device = alpaka::pltf::getDevByIdx<Acc>(0u);
+    //Make a queue
+    auto queue = alpaka::queue::Queue<Acc,alpaka::queue::Blocking>{device};
+     //Finally copy the host data into the device memory allocatedMemory_
+    alpaka::mem::view::copy(queue,allocatedMemory_, hostMemoryBuffer,bufferExtent_);       
 }
 
 //---------------------------------------------------------------------------//
@@ -65,8 +84,16 @@ template<class T>
 void DeviceVector<T>::copy_to_host(SpanT data) const
 {
     CELER_EXPECT(data.size() == this->size());
-    allocation_.copy_to_host(
-        {reinterpret_cast<Byte*>(data.data()), data.size() * sizeof(T)});
+    //Create a local memory buffer for the host data
+    auto hostMemoryBuffer(alpaka::mem::buf::alloc<T,uint32_t>(alpaka::pltf::getDevByIdx<alpaka::dev::DevCpu>(0u),bufferExtent_));    
+    //Make the first device (GPU) available
+    auto device = alpaka::pltf::getDevByIdx<Acc>(0u);
+    //Make a queue
+    auto queue = alpaka::queue::Queue<Acc,alpaka::queue::Blocking>{device};
+    //Now copy the device data into that buffer
+    alpaka::mem::view::copy(queue,hostMemoryBuffer,allocatedMemory_,bufferExtent_);    
+    //Now copy the data pointed at by the alpaka host memory buffer into the Span (data)
+    for (uint32_t counter = 0; counter < this->size(); counter++) data[counter] = alpaka::mem::view::getPtrNative(hostMemoryBuffer)[counter];        
 }
 
 //---------------------------------------------------------------------------//
@@ -76,7 +103,7 @@ void DeviceVector<T>::copy_to_host(SpanT data) const
 template<class T>
 T* DeviceVector<T>::data()
 {
-    return reinterpret_cast<T*>(allocation_.device_pointers().data());
+    return alpaka::mem::view::getPtrNative(allocatedMemory_);      
 }
 
 //---------------------------------------------------------------------------//
@@ -86,7 +113,7 @@ T* DeviceVector<T>::data()
 template<class T>
 const T* DeviceVector<T>::data() const
 {
-    return reinterpret_cast<const T*>(allocation_.device_pointers().data());
+    return reinterpret_cast<const T*>(alpaka::mem::view::getPtrNative(allocatedMemory_));    
 }
 
 //---------------------------------------------------------------------------//

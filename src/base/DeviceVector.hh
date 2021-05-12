@@ -53,8 +53,9 @@ class DeviceVector
     //!@}
 
   public:
-    // Construct with no elements
-    DeviceVector() = default;
+    // Construct with no elements - no longer uses default keyword, because alpaka class data members
+    //in this class do not have default constructors to use!
+    DeviceVector();
 
     // Construct with a number of elements
     explicit DeviceVector(size_type count);
@@ -68,13 +69,13 @@ class DeviceVector
     //// ACCESSORS ////
 
     //! Get the number of elements
-    size_type size() const { return size_; }
+    size_type size() const { return bufferExtent_.max(); }
 
     //! Get the number of elements that can fit in the allocated storage
-    size_type capacity() const { return capacity_; }
+    size_type capacity() const { return bufferExtent_.max(); }
 
     //! Whether any elements are stored
-    bool empty() const { return size_ == 0; }
+    bool empty() const { return bufferExtent_.max() == 0; }
 
     //// DEVICE ACCESSORS ////
 
@@ -97,9 +98,12 @@ class DeviceVector
     inline const T* data() const;
 
   private:
-    DeviceAllocation                    allocation_;
+    //DeviceAllocation                    allocation_;
     detail::InitializedValue<size_type> size_;
-    detail::InitializedValue<size_type> capacity_;
+    //detail::InitializedValue<size_type> capacity_;
+
+    alpaka::vec::Vec<alpaka::dim::DimInt<1>, uint32_t> bufferExtent_;
+    alpaka::mem::buf::BufUniformCudaHipRt<T, alpaka::dim::DimInt<1UL>, uint32_t> allocatedMemory_;    
 };
 
 // Swap two vectors
