@@ -27,6 +27,7 @@ namespace demo_interactor
 {
 namespace
 {
+  bool useAlpaka = false;
 //---------------------------------------------------------------------------//
 // KERNELS
 //---------------------------------------------------------------------------//
@@ -242,20 +243,22 @@ void initialize(const CudaGridParams&  opts,
 {
     CELER_EXPECT(states.alive.size() == states.size());
     CELER_EXPECT(states.rng.size() == states.size());
-    CDE_LAUNCH_KERNEL(
-        initialize, opts.block_size, states.size(), params, states, initial);
-    //Get the first device available of type GPU (i.e should be our sole GPU)/device
-    /*
-    auto const device = pltf::getDevByIdx<Acc>(0u);
-    auto queue = queue::Queue<Acc, queue::Blocking>{device};
-    auto grid_size = ( (states.size()/opts.block_size) + (states.size() % opts.block_size != 0) );
-    auto workDiv = workdiv::WorkDivMembers<Dim, Idx>{static_cast<uint32_t>(opts.block_size), static_cast<uint32_t>(grid_size), static_cast<uint32_t>(1)};
+    if (!useAlpaka){
+      CDE_LAUNCH_KERNEL(
+          initialize, opts.block_size, states.size(), params, states, initial);
+    }
+    else{
+      //Get the first device available of type GPU (i.e should be our sole GPU)/device
+      auto const device = pltf::getDevByIdx<Acc>(0u);
+      auto queue = queue::Queue<Acc, queue::Blocking>{device};
+      auto grid_size = ( (states.size()/opts.block_size) + (states.size() % opts.block_size != 0) );
+      auto workDiv = workdiv::WorkDivMembers<Dim, Idx>{static_cast<uint32_t>(opts.block_size), static_cast<uint32_t>(grid_size), static_cast<uint32_t>(1)};
 
-    //Create a task for processEvent, that we can run and then run it via a queue
-    initialize_kernel_alpaka initialize_kernel_alpaka;
-    auto taskInitialize = kernel::createTaskKernel<Acc>(workDiv,initialize_kernel_alpaka,params,states,initial);
-    queue::enqueue(queue, taskInitialize);
-    */
+      //Create a task for processEvent, that we can run and then run it via a queue
+      initialize_kernel_alpaka initialize_kernel_alpaka;
+      auto taskInitialize = kernel::createTaskKernel<Acc>(workDiv,initialize_kernel_alpaka,params,states,initial);
+      queue::enqueue(queue, taskInitialize);
+    }
 
 }
 
