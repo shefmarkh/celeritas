@@ -286,6 +286,19 @@ process_hits_kernel(ParamsDeviceRef const params, StateDeviceRef const states)
     }
 }
 
+struct process_hits_kernel_alpaka{
+  template <typename Acc>
+  ALPAKA_FN_ACC void operator()(Acc const &acc,ParamsDeviceRef const params, StateDeviceRef const states) const{
+    Detector        detector(params.detector, states.detector);
+    Detector::HitId hid{blockIdx.x * blockDim.x + threadIdx.x};
+
+    if (hid < detector.num_hits())
+    {
+        detector.process_hit(hid);
+    }
+  }
+};
+
 //---------------------------------------------------------------------------//
 /*!
  * Clear secondaries and detector hits.
@@ -303,6 +316,21 @@ cleanup_kernel(ParamsDeviceRef const params, StateDeviceRef const states)
         detector.clear_buffer();
     }
 }
+
+struct cleanup_kernel_alpaka{
+  template <typename Acc>
+  ALPAKA_FN_ACC void operator()(Acc const &acc,ParamsDeviceRef const params, StateDeviceRef const states){
+    unsigned int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
+    Detector     detector(params.detector, states.detector);
+    StackAllocator<Secondary> allocate_secondaries(states.secondaries);
+
+    if (thread_idx == 0)
+    {
+        allocate_secondaries.clear();
+        detector.clear_buffer();
+    }
+  }
+};
 
 } // namespace
 
@@ -391,15 +419,35 @@ void cleanup(const CudaGridParams&  opts,
              const ParamsDeviceRef& params,
              const StateDeviceRef&  states)
 {
-    // Process hits from buffer to grid
-    CDE_LAUNCH_KERNEL(process_hits,
-                      opts.block_size,
-                      states.detector.capacity(),
-                      params,
-                      states);
+    if(!useAlpaka){
+      // Process hits from buffer to grid
+      CDE_LAUNCH_KERNEL(process_hits,
+                        opts.block_size,
+                        states.detector.capacity(),
+                        params,
+                        states);
 
-    // Clear buffers
-    CDE_LAUNCH_KERNEL(cleanup, 32, 1, params, states);
+      // Clear buffers
+      CDE_LAUNCH_KERNEL(cleanup, 32, 1, params, states);
+    }
+    else{
+      //Calculate the parameters for the process_hits kernel (blocks etc)
+      auto grid_size = ( (states.detector.capacity()/opts.block_size) + (states.detector.capacity() % opts.block_size != 0) );
+      auto workDiv = workdiv::WorkDivMembers<Dim, Idx>{static_cast<uint32_t>(opts.block_size), static_cast<uint32_t>(grid_size), static_cast<uint32_t>(1)};
+      //Create tasks that we can run and then run it via our queue
+      // Process hits from buffer to grid
+      process_hits_kernel_alpaka process_hits_kernel_alpaka;
+      auto taskProcessHits = kernel::createTaskKernel<Acc>(workDiv,process_hits_kernel_alpaka,params,states);
+      queue::enqueue(queue, taskProcessHits);
+      // Clear buffers
+      //Calculate different parameters for this cleanup kernel (blocks etc)
+      auto grid_size_cleanup = ( (1/32) + (1 % 32 != 0) );
+      auto workDiv_cleanup = workdiv::WorkDivMembers<Dim, Idx>{static_cast<uint32_t>(32), static_cast<uint32_t>(grid_size_cleanup), static_cast<uint32_t>(1)};
+      cleanup_kernel_alpaka cleanup_kernel_alpaka;
+      auto taskCleanup = kernel::createTaskKernel<Acc>(workDiv_cleanup,cleanup_kernel_alpaka,params,states);
+      queue::enqueue(queue, taskProcessHits);
+
+    }
 
     if (opts.sync)
     {
