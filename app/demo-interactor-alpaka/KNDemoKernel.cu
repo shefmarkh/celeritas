@@ -25,8 +25,6 @@ using celeritas::detail::KleinNishinaInteractor;
 
 namespace demo_interactor
 {
-namespace
-{
   //Toggle between using CUDA and Alpaka kernel
   bool useAlpaka = false;
   //Setup infrastructure for Alpaka usage
@@ -35,11 +33,9 @@ namespace
   using Dim = dim::DimInt<1>;
   using Idx = uint32_t;
   //Define the alpaka accelerator to be GPU
-  using Acc = acc::AccGpuCudaRt<Dim,Idx>;
-  //Get the first device available of type GPU (i.e should be our sole GPU)/device
-  auto const device = pltf::getDevByIdx<Acc>(0u);
-  //Create a blocking queue for that device
-  auto queue = queue::Queue<Acc, queue::Blocking>{device};  
+  using Acc = acc::AccGpuCudaRt<Dim,Idx>;  
+namespace
+{
 //---------------------------------------------------------------------------//
 // KERNELS
 //---------------------------------------------------------------------------//
@@ -363,6 +359,10 @@ void initialize(const CudaGridParams&  opts,
           initialize, opts.block_size, states.size(), params, states, initial);
     }
     else{      
+      //Get the first device available of type GPU (i.e should be our sole GPU)/device
+      auto const device = pltf::getDevByIdx<Acc>(0u);
+      //Create a blocking queue for that device
+      auto queue = queue::Queue<Acc, queue::Blocking>{device};  
       //Calculate the parameters for the kernel (blocks etc)
       auto grid_size = ( (states.size()/opts.block_size) + (states.size() % opts.block_size != 0) );
       auto workDiv = workdiv::WorkDivMembers<Dim, Idx>{static_cast<uint32_t>(opts.block_size), static_cast<uint32_t>(grid_size), static_cast<uint32_t>(1)};
@@ -390,6 +390,10 @@ void iterate(const CudaGridParams&  opts,
       CDE_LAUNCH_KERNEL(interact, opts.block_size, states.size(), params, states);
     }
     else{
+      //Get the first device available of type GPU (i.e should be our sole GPU)/device
+      auto const device = pltf::getDevByIdx<Acc>(0u);
+      //Create a blocking queue for that device
+      auto queue = queue::Queue<Acc, queue::Blocking>{device};  
       //Calculate the parameters for the kernel (blocks etc)
       auto grid_size = ( (states.size()/opts.block_size) + (states.size() % opts.block_size != 0) );
       auto workDiv = workdiv::WorkDivMembers<Dim, Idx>{static_cast<uint32_t>(opts.block_size), static_cast<uint32_t>(grid_size), static_cast<uint32_t>(1)};
@@ -431,6 +435,10 @@ void cleanup(const CudaGridParams&  opts,
       CDE_LAUNCH_KERNEL(cleanup, 32, 1, params, states);
     }
     else{
+      //Get the first device available of type GPU (i.e should be our sole GPU)/device
+      auto const device = pltf::getDevByIdx<Acc>(0u);
+      //Create a blocking queue for that device
+      auto queue = queue::Queue<Acc, queue::Blocking>{device};  
       //Calculate the parameters for the process_hits kernel (blocks etc)
       auto grid_size = ( (states.detector.capacity()/opts.block_size) + (states.detector.capacity() % opts.block_size != 0) );
       auto workDiv = workdiv::WorkDivMembers<Dim, Idx>{static_cast<uint32_t>(opts.block_size), static_cast<uint32_t>(grid_size), static_cast<uint32_t>(1)};
