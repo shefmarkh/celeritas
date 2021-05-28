@@ -120,6 +120,31 @@ move_kernel(ParamsDeviceRef const params, StateDeviceRef const states)
                                        rng);
 }
 
+struct move_kernel_alpaka{
+  template <typename Acc>
+  ALPAKA_FN_ACC void operator()(Acc const &acc,ParamsDeviceRef const params, StateDeviceRef const states) const{
+    unsigned int tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Exit if out of range or already dead
+    if (tid >= states.size() || !states.alive[tid])
+    {
+        return;
+    }
+
+    // Construct particle accessor from immutable and thread-local data
+    ParticleTrackView particle(params.particle, states.particle, ThreadId(tid));
+    RngEngine         rng(states.rng, ThreadId(tid));
+
+    // Move to collision
+    XsCalculator calc_xs(params.tables.xs, params.tables.reals);
+    demo_interactor::move_to_collision(particle,
+                                       calc_xs,
+                                       states.direction[tid],
+                                       &states.position[tid],
+                                       &states.time[tid],
+                                       rng);
+  }
+};
 
 //---------------------------------------------------------------------------//
 /*!
@@ -186,6 +211,64 @@ interact_kernel(ParamsDeviceRef const params, StateDeviceRef const states)
     states.direction[tid] = interaction.direction;
     particle.energy(interaction.energy);
 }
+
+struct interact_kernel_alpaka {
+  template <typename Acc>
+  ALPAKA_FN_ACC void operator()(Acc const &acc,ParamsDeviceRef const params, StateDeviceRef const states) const{
+    StackAllocator<Secondary> allocate_secondaries(states.secondaries);
+    unsigned int              tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Exit if out of range or already dead
+    if (tid >= states.size() || !states.alive[tid])
+    {
+        return;
+    }
+
+    // Construct particle accessor from immutable and thread-local data
+    ParticleTrackView particle(params.particle, states.particle, ThreadId(tid));
+    RngEngine         rng(states.rng, ThreadId(tid));
+
+    Detector detector(params.detector, states.detector);
+
+    Hit h;
+    h.pos    = states.position[tid];
+    h.dir    = states.direction[tid];
+    h.thread = ThreadId(tid);
+    h.time   = states.time[tid];
+
+    if (particle.energy() < units::MevEnergy{0.01})
+    {
+        // Particle is below interaction energy
+        h.energy_deposited = particle.energy();
+
+        // Deposit energy and kill
+        detector.buffer_hit(h);
+        states.alive[tid] = false;
+        return;
+    }
+
+    // Construct RNG and interaction interfaces
+    KleinNishinaInteractor interact(
+        params.kn_interactor, particle, h.dir, allocate_secondaries);
+
+    // Perform interaction: should emit a single particle (an electron)
+    Interaction interaction = interact(rng);
+    CELER_ASSERT(interaction);
+
+    // Deposit energy from the secondary (effectively, an infinite energy
+    // cutoff)
+    {
+        const auto& secondary = interaction.secondaries.front();
+        h.dir                 = secondary.direction;
+        h.energy_deposited    = secondary.energy;
+        detector.buffer_hit(h);
+    }
+
+    // Update post-interaction state (apply interaction)
+    states.direction[tid] = interaction.direction;
+    particle.energy(interaction.energy);
+  }
+};
 
 //---------------------------------------------------------------------------//
 /*!
@@ -271,11 +354,27 @@ void iterate(const CudaGridParams&  opts,
              const ParamsDeviceRef& params,
              const StateDeviceRef&  states)
 {
-    // Move to the collision site
-    CDE_LAUNCH_KERNEL(move, opts.block_size, states.size(), params, states);
 
-    // Perform the interaction
-    CDE_LAUNCH_KERNEL(interact, opts.block_size, states.size(), params, states);
+    if (!useAlpaka) {
+      // Move to the collision site
+      CDE_LAUNCH_KERNEL(move, opts.block_size, states.size(), params, states);
+      // Perform the interaction
+      CDE_LAUNCH_KERNEL(interact, opts.block_size, states.size(), params, states);
+    }
+    else{
+      //Calculate the parameters for the kernel (blocks etc)
+      auto grid_size = ( (states.size()/opts.block_size) + (states.size() % opts.block_size != 0) );
+      auto workDiv = workdiv::WorkDivMembers<Dim, Idx>{static_cast<uint32_t>(opts.block_size), static_cast<uint32_t>(grid_size), static_cast<uint32_t>(1)};
+      //Create tasks that we can run and then run it via our queue
+      // Move to the collision site
+      move_kernel_alpaka move_kernel_alpaka;
+      auto taskMove = kernel::createTaskKernel<Acc>(workDiv,move_kernel_alpaka,params,states);
+      queue::enqueue(queue, taskMove);
+      // Perform the interaction
+      interact_kernel_alpaka interact_kernel_alpaka;
+      auto taskInteract = kernel::createTaskKernel<Acc>(workDiv,interact_kernel_alpaka,params,states);
+      queue::enqueue(queue, taskInteract);
+    }
 
     if (opts.sync)
     {
