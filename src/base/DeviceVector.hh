@@ -97,12 +97,18 @@ class DeviceVector
     // Raw pointer to device data (dangerous!)
     inline const T* data() const;
 
-  private:
-    //DeviceAllocation                    allocation_;
-    detail::InitializedValue<size_type> size_;
-    //detail::InitializedValue<size_type> capacity_;
-
-    alpaka::vec::Vec<alpaka::dim::DimInt<1>, uint32_t> bufferExtent_;
+  private:    
+    detail::InitializedValue<size_type> size_;    
+    //This gives Alpaka access to the device of choice
+    alpaka::queue::QueueUniformCudaHipRtBlocking::QueueUniformCudaHipRtBlocking device_;
+    using Dim = alpaka::dim::DimInt<1>;
+    //Define the type of accelerator we want to use - GPU
+    using Acc = alpaka::acc::AccGpuCudaRt<Dim, uint32_t>;
+    //This provides access to a blocking queue for copying the data to the device
+    alpaka::queue::Queue<Acc, alpaka::queue::property::Blocking> queue_;
+    //A data buffer that stores the data we want to deal with.
+    alpaka::vec::Vec<Dim, uint32_t> bufferExtent_;
+    //A memory allocator for the data in the buffer
     alpaka::mem::buf::BufUniformCudaHipRt<T, alpaka::dim::DimInt<1UL>, uint32_t> allocatedMemory_;    
 };
 
