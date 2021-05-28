@@ -27,7 +27,19 @@ namespace demo_interactor
 {
 namespace
 {
+  //Toggle between using CUDA and Alpaka kernel
   bool useAlpaka = false;
+  //Setup infrastructure for Alpaka usage
+  using namespace alpaka;
+  //Define shortcuts for some alpaka items we will use
+  using Dim = dim::DimInt<1>;
+  using Idx = uint32_t;
+  //Define the alpaka accelerator to be GPU
+  using Acc = acc::AccGpuCudaRt<Dim,Idx>;
+  //Get the first device available of type GPU (i.e should be our sole GPU)/device
+  auto const device = pltf::getDevByIdx<Acc>(0u);
+  //Create a blocking queue for that device
+  auto queue = queue::Queue<Acc, queue::Blocking>{device};  
 //---------------------------------------------------------------------------//
 // KERNELS
 //---------------------------------------------------------------------------//
@@ -58,14 +70,6 @@ __global__ void initialize_kernel(ParamsDeviceRef const params,
     states.alive[tid]     = true;
     
 }
-
-using namespace alpaka;
-
-//Define shortcuts for some alpaka items we will use
-using Dim = dim::DimInt<1>;
-using Idx = uint32_t;
-//Define the alpaka accelerator to be Nvidia GPU
-using Acc = acc::AccGpuCudaRt<Dim,Idx>;
 
 struct initialize_kernel_alpaka{
   template <typename Acc>
@@ -247,14 +251,11 @@ void initialize(const CudaGridParams&  opts,
       CDE_LAUNCH_KERNEL(
           initialize, opts.block_size, states.size(), params, states, initial);
     }
-    else{
-      //Get the first device available of type GPU (i.e should be our sole GPU)/device
-      auto const device = pltf::getDevByIdx<Acc>(0u);
-      auto queue = queue::Queue<Acc, queue::Blocking>{device};
+    else{      
+      //Calculate the parameters for the kernel (blocks etc)
       auto grid_size = ( (states.size()/opts.block_size) + (states.size() % opts.block_size != 0) );
       auto workDiv = workdiv::WorkDivMembers<Dim, Idx>{static_cast<uint32_t>(opts.block_size), static_cast<uint32_t>(grid_size), static_cast<uint32_t>(1)};
-
-      //Create a task for processEvent, that we can run and then run it via a queue
+      //Create a task that we can run and then run it via our queue
       initialize_kernel_alpaka initialize_kernel_alpaka;
       auto taskInitialize = kernel::createTaskKernel<Acc>(workDiv,initialize_kernel_alpaka,params,states,initial);
       queue::enqueue(queue, taskInitialize);
